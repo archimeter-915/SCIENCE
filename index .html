@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>混水「眸」魚 口試練習平台</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#f8fafc;color:#111827;min-height:100vh}
+button{cursor:pointer;font-family:inherit}
+textarea{font-family:inherit;outline:none}
+#app{max-width:720px;margin:0 auto;padding:16px}
+.header{background:white;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:12px}
+.title{font-size:18px;font-weight:600;color:#1e293b}
+.subtitle{font-size:13px;color:#94a3b8;margin-top:2px}
+.progress-bar{background:#f1f5f9;border-radius:6px;height:8px;overflow:hidden;margin:10px 0}
+.progress-fill{height:100%;background:#2563eb;border-radius:6px;transition:width 0.4s}
+.mode-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.mode-btn{padding:6px 14px;font-size:13px;border-radius:20px;border:1px solid #d1d5db;background:white;color:#6b7280}
+.mode-btn.ms{background:#2563eb;color:white;border-color:#2563eb}
+.mode-btn.mt{background:#7c3aed;color:white;border-color:#7c3aed}
+.mode-btn.mr{color:#ef4444;border-color:#fca5a5}
+.filter-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px}
+.fbtn{padding:4px 10px;font-size:12px;border-radius:20px;border:1px solid #e2e8f0;background:white;color:#6b7280}
+.fbtn.active{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;font-weight:500}
+.q-count{font-size:12px;color:#94a3b8;margin-bottom:7px}
+.q-item{display:flex;align-items:center;gap:9px;padding:10px 12px;background:white;border:1px solid #e2e8f0;border-radius:10px;cursor:pointer;text-align:left;width:100%;margin-bottom:5px;transition:border-color 0.15s}
+.q-item:hover{border-color:#93c5fd;background:#f0f9ff}
+.q-item.psome{background:#fafff7;border-color:#bbf7d0}
+.q-item.pall{background:#f0fdf4;border-color:#86efac}
+.qnum{min-width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0}
+.qtxt{flex:1;min-width:0}
+.qq{font-size:13px;color:#111827;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qcat{font-size:11px;color:#94a3b8;margin-top:1px}
+.sbadge{font-size:11px;padding:2px 6px;border-radius:4px;flex-shrink:0;white-space:nowrap}
+.ntag{font-size:10px;padding:1px 6px;border-radius:10px;font-weight:500;white-space:nowrap}
+.yi-t{background:#fce7f3;color:#9d174d}
+.xi-t{background:#e0e7ff;color:#3730a3}
+.back-btn{display:flex;align-items:center;gap:5px;padding:7px 12px;font-size:13px;border-radius:8px;border:1px solid #d1d5db;background:white;margin-bottom:12px}
+.dhead{display:flex;align-items:center;gap:7px;margin-bottom:12px;flex-wrap:wrap}
+.badge{padding:3px 8px;border-radius:5px;font-size:12px}
+.q-card{background:white;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-bottom:12px}
+.qno{font-size:11px;color:#94a3b8;margin-bottom:6px}
+.qfull{font-size:16px;font-weight:500;color:#111827;line-height:1.65}
+.wpassed{display:flex;gap:5px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.wlbl{font-size:12px;color:#94a3b8}
+.wtag{font-size:12px;padding:2px 8px;border-radius:12px;font-weight:500}
+/* 語音區 */
+.voice-area{margin-bottom:12px}
+.voice-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px}
+textarea.ans{flex:1;min-height:90px;padding:11px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;line-height:1.6;resize:vertical}
+textarea.ans:focus{border-color:#93c5fd}
+.mic-btn{width:44px;height:44px;border-radius:50%;border:2px solid #d1d5db;background:white;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:all 0.2s}
+.mic-btn.listening{background:#fee2e2;border-color:#f87171;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.3)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
+.mic-hint{font-size:11px;color:#94a3b8;text-align:center;margin-top:2px}
+.action-btns{display:flex;gap:6px;flex-wrap:wrap}
+.bp{padding:7px 14px;font-size:13px;font-weight:500;background:#2563eb;color:white;border:none;border-radius:8px}
+.bp:disabled{background:#e2e8f0;color:#94a3b8;cursor:not-allowed}
+.bs{padding:7px 11px;font-size:13px;border-radius:8px;border:1px solid #d1d5db;background:white;color:#374151}
+.bpass{padding:7px 11px;font-size:13px;border-radius:8px;border:1px solid #86efac;background:#f0fdf4;color:#166534}
+.fb{border-radius:8px;padding:11px;margin-top:9px;font-size:13px}
+.fb.ok{background:#f0fdf4;border:1px solid #86efac}
+.fb.fail{background:#fef2f2;border:1px solid #fca5a5}
+.fbt{font-weight:500;margin-bottom:3px;font-size:13px}
+.fb.ok .fbt{color:#166534}
+.fb.fail .fbt{color:#991b1b}
+.fb.ok p{color:#14532d}
+.fb.fail p{color:#7f1d1d}
+.hint-box{background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:11px;margin-bottom:9px}
+.ht{font-size:12px;font-weight:500;color:#854d0e;margin-bottom:3px}
+.hint-box p{font-size:13px;color:#713f12;line-height:1.7}
+.tbox{background:#f0f9ff;border:1px solid #7dd3fc;border-radius:10px;padding:13px;margin-bottom:12px}
+.ttl{font-size:13px;font-weight:500;color:#0369a1;margin-bottom:6px}
+.tbox p{font-size:13px;color:#111827;line-height:1.7;margin-bottom:10px}
+.tpr{display:flex;gap:7px;flex-wrap:wrap}
+.btp{flex:1;padding:9px;font-size:13px;border-radius:8px;border:1px solid #d1d5db;background:white;min-width:80px;transition:all 0.2s}
+.btp.yia{background:#fce7f3;border-color:#f9a8d4;color:#9d174d;font-weight:500}
+.btp.xia{background:#e0e7ff;border-color:#a5b4fc;color:#3730a3;font-weight:500}
+.nav-btns{display:flex;gap:7px;margin-top:9px}
+.nbtn{flex:1;padding:9px;font-size:13px;border-radius:8px;border:1px solid #d1d5db;background:white}
+.nbtn:disabled{opacity:0.3;cursor:not-allowed}
+.lb{background:white;border:1px solid #e2e8f0;border-radius:10px;padding:12px;margin-top:10px}
+.lbt{font-size:12px;font-weight:500;color:#6b7280;margin-bottom:8px}
+.lbr{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f1f5f9}
+.lbr:last-child{border:none}
+.lbn{font-size:13px;font-weight:500;min-width:36px}
+.lbb{flex:1;background:#f1f5f9;border-radius:4px;height:6px;overflow:hidden}
+.lbbf{height:100%;border-radius:4px;transition:width 0.5s}
+.lbnum{font-size:12px;color:#6b7280;min-width:40px;text-align:right}
+.psel{display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.pslbl{font-size:12px;color:#6b7280}
+.psb{padding:5px 14px;font-size:13px;border-radius:20px;border:1px solid #d1d5db;background:white;color:#6b7280;transition:all 0.2s}
+.psb.yia{background:#fce7f3;border-color:#f9a8d4;color:#9d174d;font-weight:500}
+.psb.xia{background:#e0e7ff;border-color:#a5b4fc;color:#3730a3;font-weight:500}
+/* 語音不支援提示 */
+.no-voice{font-size:11px;color:#f59e0b;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:5px 10px;margin-top:5px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const QUESTIONS=[
+  {id:1,stars:5,cat:'動機',q:'請說明你的研究動機，為什麼選擇用AI來估計魚群數量？',hint:'傳統撈魚計數的痛點+零接觸+產業需求'},
+  {id:2,stars:5,cat:'動機',q:'為什麼選孔雀魚而不是其他魚種？',hint:'公母外觀差異大→天然標記+觀賞魚養殖情境+實驗可控'},
+  {id:3,stars:4,cat:'動機',q:'你說「魚會被嚇死」，有實際數據支持嗎？',hint:'改說引用文獻：人工捕撈造成生理壓力→影響存活率'},
+  {id:4,stars:3,cat:'動機',q:'最初測試超音波感測器為何失敗？',hint:'玻璃回音+無法分辨個體+無法辨識公母'},
+  {id:5,stars:5,cat:'動機',q:'這個研究最終希望解決什麼實際產業問題？',hint:'養殖計數人工化→自動化→降低損耗+公母分選'},
+  {id:6,stars:4,cat:'動機',q:'你的研究問題有三個，哪一個是最核心的？',hint:'第三個：AI影像辨識捉放法設計（前兩個是鋪路）'},
+  {id:7,stars:5,cat:'動機',q:'為什麼不直接從YOLO開始做，要先做捉放法和ImageJ？',hint:'需要對照組說明為何需要AI+三代演算法比較基準'},
+  {id:8,stars:3,cat:'動機',q:'你的研究目前距離「無人化養殖管理」還差多遠？',hint:'98.5%已達關鍵條件，但仍需室外驗證+公魚辨識改善'},
+  {id:9,stars:4,cat:'動機',q:'如果換成吳郭魚（外觀差異不大），你的AI捉放法還能用嗎？',hint:'換標記策略（體型/斑紋）+邏輯不變+遷移學習'},
+  {id:10,stars:3,cat:'動機',q:'你的研究有沒有考慮魚的福利（Animal Welfare）問題？',hint:'捉放法2.3%死亡率→AI辨識捉放法零接觸解決'},
+  {id:11,stars:2,cat:'動機',q:'你有沒有和其他國家的類似研究做比較？',hint:'NEC水產ICT+水下感測技術+填補生態學×AI空缺'},
+  {id:12,stars:3,cat:'動機',q:'這個研究是你一個人完成的嗎？最困難的部分是什麼？',hint:'OpenCV調參失敗→學YOLO+標注150張是突破點'},
+  {id:13,stars:5,cat:'動機',q:'「族群覆蓋率」和一般說的「準確率」有什麼不同？',hint:'準確率=分類正確比例；覆蓋率=估計值/真實值×100%'},
+  {id:14,stars:4,cat:'動機',q:'「用孔雀魚公魚當天然標記」這個想法是怎麼想到的？',hint:'生物課捉放法+公魚花紋無需額外標記+AI可辨識顏色'},
+  {id:15,stars:3,cat:'動機',q:'如果魚缸的水是混濁的養殖池水，你的系統還能用嗎？',hint:'混濁度臨界值0.37%→過濾+換水+遷移學習'},
+  {id:16,stars:3,cat:'動機',q:'你的研究有做重複實驗嗎？怎麼確保數據可靠性？',hint:'每組3-5次重複+計算σ+固定環境控制雙標準'},
+  {id:17,stars:4,cat:'動機',q:'這個研究屬於應用科學還是基礎科學？',hint:'兩者都有：K值/R²是基礎；AI辨識捉放法是應用'},
+  {id:18,stars:2,cat:'動機',q:'這個研究如果要申請專利，最有可能申請什麼？',hint:'AI辨識捉放法（天然標記+AI+捉放公式）+K=1.55裝置'},
+  {id:19,stars:3,cat:'動機',q:'如果你有更多資源，這個研究下一步最想做什麼？',hint:'公母雙類別標注+YOLOv8s/m+室外養殖場驗證'},
+  {id:20,stars:4,cat:'動機',q:'你認為這個研究對台灣水產養殖業最重要的貢獻是什麼？',hint:'低成本（C920+筆電）+98.5%覆蓋率+全自動化方案'},
+  {id:21,stars:5,cat:'生態學',q:'請說明Lincoln-Petersen法的完整公式和每個符號的意義。',hint:'N=(M×n)/R，M標記數、n第二次總數、R重捕標記數'},
+  {id:22,stars:5,cat:'生態學',q:'Lincoln-Petersen法有哪些基本前提假設？你的實驗有沒有違反？',hint:'封閉族群+隨機捕捉+標記不影響行為+均勻混合（閃避行為違反第3點）'},
+  {id:23,stars:4,cat:'生態學',q:'實驗一發現公魚40%時覆蓋率107%，為什麼會超過100%？',hint:'R偏低（閃避+聚集）→N計算略高估→107%屬可接受範圍'},
+  {id:24,stars:4,cat:'生態學',q:'為什麼公魚比例10%和20%的覆蓋率都只有80%？',hint:'M太小→R撈到機率低→甚至R=0→公式失準'},
+  {id:25,stars:5,cat:'生態學',q:'沉餌攝影法的結果跟直覺相反——分越少區覆蓋率越高。你如何解釋？',hint:'群聚魚類→飼料分少→魚聚集多→計數高；多區份量少→魚散開+重複計數'},
+  {id:26,stars:5,cat:'生態學',q:'穿越線攝影法覆蓋率最高只到89.5%，你說是「視錐體死角」的問題。',hint:'視錐體=四角錐台，體積只有四角柱1/3→2/3死角→無法達100%'},
+  {id:27,stars:3,cat:'生態學',q:'你有測試過「浮餌攝影法」嗎？',hint:'未完整展開，沉餌法已涵蓋誘集概念，未來可補充'},
+  {id:28,stars:4,cat:'生態學',q:'魚群「閃避行為」對捉放法的影響有多大？有沒有辦法消除？',hint:'閃避→R偏低→N高估；AI辨識捉放法完全不撈魚根本解決'},
+  {id:29,stars:3,cat:'生態學',q:'你說「每次捕撈操作死亡率約2-3%」，這個數字是怎麼來的？',hint:'改為引用文獻：人工捕撈生理壓力可能影響存活率（不說實測值）'},
+  {id:30,stars:3,cat:'生態學',q:'「樣區法」和「穿越線法」有什麼不同？你的研究屬於哪一種？',hint:'樣區法=固定面積；穿越線法=線型調查；本研究=改良版穿越線'},
+  {id:31,stars:4,cat:'生態學',q:'在捉放法實驗中，你把魚缸分成五區每區撈一勺，這樣的設計有什麼科學邏輯？',hint:'系統性分層取樣→確保空間代表性→降低取樣偏差'},
+  {id:32,stars:5,cat:'生態學',q:'捉放法最高107%，AI辨識捉放法98.5%，為什麼說後者更好？',hint:'107%是高估+不穩定+需撈魚；98.5%穩定+零接觸+可重複自動執行'},
+  {id:33,stars:4,cat:'生態學',q:'傳統捉放法最佳公魚40%，AI辨識捉放法最佳27%，為什麼不同？',hint:'傳統：R偏低需更多標記補償；AI：公魚活躍→重複計數→最佳比例較低'},
+  {id:34,stars:3,cat:'生態學',q:'沉餌法中你說「魚可能被計算到兩次」，穿越線法有沒有這個問題？',hint:'穿越線靜態拍照較少，但視錐體重疊仍可能重複計數，3點間距解決'},
+  {id:35,stars:4,cat:'生態學',q:'你的研究有五種方法，哪一種最準確？為什麼你不直接用最準確的？',hint:'直接計算法最準但大型魚塭不可行；AI辨識捉放法是次優且自動化'},
+  {id:36,stars:3,cat:'生態學',q:'為什麼選擇「5、10、15、20、25隻」作為梯度？',hint:'等差5隻清楚呈現趨勢；25隻是微型缸安全飽和密度上限'},
+  {id:37,stars:3,cat:'生態學',q:'穿越線最佳間距17cm，為什麼不繼續縮小到5cm？',hint:'間距太小→視錐體重疊→重複計數高估；視錐體死角物理限制永遠存在'},
+  {id:38,stars:3,cat:'生態學',q:'「族群覆蓋率」低於85%算是可接受的嗎？',hint:'本研究設定85-115%為良好；低於85%代表少算>15%，對養殖決策影響大'},
+  {id:39,stars:2,cat:'生態學',q:'如果魚缸裡有水草，捉放法和AI辨識法的效果會怎麼變化？',hint:'捉放法：躲藏空間增加→閃避更嚴重；AI：遮擋增加→視野死角增大'},
+  {id:40,stars:3,cat:'生態學',q:'你研究中的「直接計數法」是如何執行的？有沒有誤差？',hint:'人工逐隻點數放入缸→Ground Truth；可能誤差：實驗過程中魚隻壓力'},
+  {id:41,stars:4,cat:'生態學',q:'你把公魚作為標記，有沒有考慮過公魚本身的行為可能影響實驗？',hint:'公魚活躍→游速快→重複計數；AI辨識捉放法最佳比例27%即是平衡點'},
+  {id:42,stars:2,cat:'生態學',q:'沉餌法實驗中，「260隻」魚的族群大小是怎麼確定的？',hint:'直接計數法放入，100×30×20cm缸，每231mL一隻在合理密度內'},
+  {id:43,stars:2,cat:'生態學',q:'你有沒有考慮過季節或時間對孔雀魚行為的影響？',hint:'室內控制環境（溫度/光源固定）排除季節影響；室外驗證需考慮'},
+  {id:44,stars:3,cat:'生態學',q:'在三種傳統估算法中，哪一種最適合推廣到實際養殖？',hint:'穿越線攝影法：不接觸魚+89.5%+可標準化+無需佈餌'},
+  {id:45,stars:2,cat:'生態學',q:'「穿越線法」在野外生態調查和你的研究中有什麼不同？',hint:'野外=人走動計數；本研究=固定攝影機分段拍攝+AI計數（標準化）'},
+  {id:46,stars:3,cat:'生態學',q:'為什麼沉餌法取樣區越多，覆蓋率反而越低？這個發現有什麼應用意義？',hint:'告訴業者：誘集法要集中（1區）而非分散；群聚魚類誘集策略原則'},
+  {id:47,stars:2,cat:'生態學',q:'你的實驗有沒有控制「魚的年齡」或「魚的大小」這個變因？',hint:'未嚴格控制，更接近真實養殖（混齡），未來可補充同齡對照'},
+  {id:48,stars:2,cat:'生態學',q:'你設計了「直接計數法」作為Ground Truth，這在大型養殖場可行嗎？',hint:'完全不可行→正是本研究存在的意義；AI系統取代人工計數'},
+  {id:49,stars:3,cat:'生態學',q:'如果孔雀魚公魚都躲在魚缸同一個角落，AI辨識捉放法的準確率會怎麼變化？',hint:'180秒大數據讓魚游散；3個取樣點（左中右）部分緩解分布不均'},
+  {id:50,stars:3,cat:'生態學',q:'你的研究提到「魚捕撈操作」，累積多次對族群影響大嗎？',hint:'根據文獻人工操作造成生理壓力累積影響；AI方法零接觸無此問題'},
+  {id:51,stars:4,cat:'演算法',q:'請說明ImageJ是什麼？它和一般的圖片軟體有什麼不同？',hint:'NIH開發科學量測軟體；輸出精確數字（面積/計數）vs Photoshop美化'},
+  {id:52,stars:5,cat:'演算法',q:'請解釋「Threshold（二值化閾值）」是什麼，以及在ImageJ計數中的作用。',hint:'灰階→黑白二元化；分界線決定哪些像素是魚（黑）哪些是背景（白）'},
+  {id:53,stars:4,cat:'演算法',q:'什麼是「Watershed（水文分割演算法）」？為什麼對孔雀魚效果不好？',hint:'注水切割黏連物件；孔雀魚細長邊緣不規則+3D重疊→分水嶺找不到'},
+  {id:54,stars:5,cat:'演算法',q:'MOG2是什麼？它和靜態圖像分析有什麼根本不同？',hint:'Mixture of Gaussians 2；學習靜態背景→偵測移動前景（動態vs靜態）'},
+  {id:55,stars:3,cat:'演算法',q:'OpenCV的「Find Contours（尋找輪廓）」功能做什麼用？',hint:'找出二值化影像中所有黑色物件邊界→計算面積→過濾雜訊→計數'},
+  {id:56,stars:5,cat:'演算法',q:'你說OpenCV有「幽靈母魚」的問題，能用程式碼的角度解釋它是怎麼產生的嗎？',hint:'MIN_AREA調低→水泡觸發偵測框→HSV飽和度低判為母魚；大母魚面積÷500放大計為2-3隻'},
+  {id:57,stars:4,cat:'演算法',q:'HSV色彩空間是什麼？為什麼用HSV而不用RGB來辨識孔雀魚的顏色？',hint:'H（色調）不受亮度影響；RGB在不同光線下數值波動大；HSV的H值穩定'},
+  {id:58,stars:3,cat:'演算法',q:'你的OpenCV程式使用了哪些關鍵參數？這些參數是怎麼決定的？',hint:'MIN_AREA=80；AVG_FISH_AREA=500；learning_rate=0.005；HSV閾值=60；經驗調參'},
+  {id:59,stars:5,cat:'演算法',q:'YOLO的全名是什麼？它的核心概念「You Only Look Once」是什麼意思？',hint:'一次前向傳播同時完成偵測+分類+定位；比兩階段方法快很多'},
+  {id:60,stars:3,cat:'演算法',q:'YOLOv8和之前版本的YOLO有什麼進步？',hint:'Anchor-free+解耦頭+模型系列化（n/s/m/l/x）+支援Mosaic增強'},
+  {id:61,stars:4,cat:'演算法',q:'什麼是「Confidence Score（信心分數）」？你的實驗設定是多少？為什麼？',hint:'YOLO對偵測目標的把握程度0-1；設0.25因母魚透明若設0.5漏偵測嚴重'},
+  {id:62,stars:5,cat:'演算法',q:'什麼是「NMS（Non-Maximum Suppression，非極大值抑制）」？在你的實驗中有什麼問題？',hint:'NMS刪除重疊框只保留最高信心框；高密度魚群IoU高→NMS刪掉真實的魚→漏算'},
+  {id:63,stars:4,cat:'演算法',q:'「Mosaic資料增強」是什麼？它對你的訓練特別有用的原因？',hint:'4張圖切碎拼接→超高密度場景；讓模型提前學習高密度遮蔽→實測25隻表現更好'},
+  {id:64,stars:4,cat:'演算法',q:'你用Roboflow標注了150張照片，標注的步驟是什麼？',hint:'上傳圖→畫Bounding Box→標Male/Female→資料集切割→開增強→匯出YOLO格式'},
+  {id:65,stars:3,cat:'演算法',q:'為什麼要用Google Colab來訓練模型？',hint:'免費GPU T4；一般筆電CPU訓練需數天；Colab縮短至數小時'},
+  {id:66,stars:3,cat:'演算法',q:'訓練好的YOLO模型儲存為「best.pt」，這是什麼格式？',hint:'PyTorch模型權重檔；儲存驗證集損失最低的epoch；可直接載入推論'},
+  {id:67,stars:5,cat:'演算法',q:'你說OpenCV的失效方向是「不可預測」，YOLO是「系統性低估可預測」，這個差別有什麼實際意義？',hint:'YOLO低估有規律（R²=0.926）→可用迴歸公式校正；OpenCV無規律→無法修正'},
+  {id:68,stars:5,cat:'演算法',q:'線性迴歸校正公式 X=2.10Y−5.69，R²=0.926，請問R²是什麼意思？',hint:'R²=0.926代表92.6%的族群數量變異可由YOLO偵測值解釋→線性關係強→可校正'},
+  {id:69,stars:3,cat:'演算法',q:'如果你的YOLO訓練資料不夠多，會有什麼問題？',hint:'過擬合（Overfitting）→訓練集表現好→新場景泛化能力差；本研究150張有此風險'},
+  {id:70,stars:3,cat:'演算法',q:'你的YOLO模型訓練了多少個Epoch？Loss曲線有沒有收斂？',hint:'訓練中監測Loss曲線下降並收斂後採用best.pt（驗證集損失最低點）'},
+  {id:71,stars:5,cat:'演算法',q:'為什麼YOLO辨識公魚的誤差高達-79%到-98%？這是訓練問題還是模型問題？',hint:'訓練集未以Male/Female為獨立類別；HSV二次分類延續OpenCV問題；3D視角盲區'},
+  {id:72,stars:3,cat:'演算法',q:'你說「IQR」和「outlier」用來分析逐幀計數的穩定性，請解釋這兩個統計概念。',hint:'IQR=Q3-Q1（中間50%數據分散程度）；outlier=超出1.5×IQR的極端值'},
+  {id:73,stars:4,cat:'演算法',q:'OpenCV第一代（MOG2）和第二代（HSV特徵斑點）的核心差異是什麼？',hint:'第一代偵測整條魚輪廓動態；第二代偵測魚身上的顏色特徵點（更精細但更脆弱）'},
+  {id:74,stars:5,cat:'演算法',q:'「Rule-based」電腦視覺和深度學習的根本差別是什麼？',hint:'Rule-based：手動設定規則，條件改變就崩潰；深度學習：從資料自動學習通用特徵'},
+  {id:75,stars:5,cat:'演算法',q:'你說「訓練資料必須用公母混合照片，不能分開訓練」，原因是什麼？',hint:'分開訓練→特徵孤立→實測時公母疊在一起AI完全不認識→必須用混合場景訓練'},
+  {id:76,stars:3,cat:'演算法',q:'「Transfer Learning（遷移學習）」是什麼？在你的研究中有應用嗎？',hint:'COCO預訓練→孔雀魚微調（Fine-tuning）；本研究用YOLOv8n預訓練基礎'},
+  {id:77,stars:3,cat:'演算法',q:'如果在實驗中同時比較YOLOv8n、YOLOv8s、YOLOv8m，你預期結果會怎麼不同？',hint:'更大模型在高密度（n=20-25）應更準；但速度慢→可能無法維持1FPS即時需求'},
+  {id:78,stars:3,cat:'演算法',q:'你的實驗裡，低密度時YOLO也有7%的系統性低估，原因是什麼？',hint:'YOLOv8n輕量化→快速游動或側身的魚信心分數低於0.25被篩除'},
+  {id:79,stars:4,cat:'演算法',q:'低密度時YOLO只有76%，OpenCV卻有108-110%，為什麼OpenCV在這個密度比YOLO好？',hint:'OpenCV在中密度的「準確」是誤差巧合相消；YOLO低估是誠實的系統性誤差（可校正）'},
+  {id:80,stars:3,cat:'演算法',q:'你的研究中「IoU（Intersection over Union）」是什麼？',hint:'兩框交集÷聯集；YOLO訓練衡量預測框vs Ground Truth框的精準度；NMS刪重複框的依據'},
+  {id:81,stars:3,cat:'演算法',q:'如果你的YOLO模型在新的魚缸（不同背板顏色）使用，需要重新訓練嗎？',hint:'可能需要Fine-tuning；白→黑背板對母魚對比度影響大；加入新環境照片微調即可'},
+  {id:82,stars:2,cat:'演算法',q:'「Anchor-free」設計（YOLOv8的特點）和傳統「Anchor-based」有什麼差別？',hint:'不需預設固定形狀錨框→對孔雀魚多變形態（側身/正面/尾鰭展開）更靈活'},
+  {id:83,stars:4,cat:'演算法',q:'你的研究中「1FPS取樣180秒」的設計有什麼統計意義？',hint:'180個獨立樣本→降低異常幀影響→極值分析取最大值→統計功效足夠'},
+  {id:84,stars:4,cat:'演算法',q:'「逐幀極值分析（取最大值）」和「取平均值」哪個更準確？',hint:'取最大值更準：遮蔽只會低估不會高估→最分散那幀計數最接近真實值'},
+  {id:85,stars:3,cat:'演算法',q:'你提到「遮蔽補償方程式」，這和線性迴歸校正公式（X=2.10Y−5.69）是同一件事嗎？',hint:'是同一件事，功能角度叫「遮蔽補償」；統計方法角度叫「線性迴歸校正」'},
+  {id:86,stars:3,cat:'演算法',q:'你說OpenCV在高密度（n=20-25）時「震盪劇烈（σ=2.76-2.98）」，具體代表什麼？',hint:'同樣25隻，每秒計數在18-24隻之間波動；最大最小差8隻→不可靠'},
+  {id:87,stars:2,cat:'演算法',q:'你的研究為什麼選擇用「Python+OpenCV」而不是其他語言或軟體？',hint:'主流AI語言+豐富函式庫+YOLOv8官方也是Python→無縫整合'},
+  {id:88,stars:3,cat:'演算法',q:'為什麼要用「箱型圖」而不是折線圖或長條圖來展示逐幀計數的穩定性？',hint:'箱型圖同時顯示：中位數+IQR+最大最小值+outlier→完整反映分布形態'},
+  {id:89,stars:2,cat:'演算法',q:'你的模型能辨識的最小的魚有多小？',hint:'成魚3-5cm在畫面中約135-225像素；幼魚0.5cm可能低於偵測下限'},
+  {id:90,stars:3,cat:'演算法',q:'你說「視覺標記」的概念能不能在其他動物身上應用？',hint:'斑馬條紋/豹斑點/不同羽色鳥類；WildMe用AI辨識鯨鯊個體斑點是同類研究'},
+  {id:91,stars:2,cat:'演算法',q:'你的研究用了哪些Python函式庫？各自做什麼用？',hint:'cv2（影像處理）+ultralytics（YOLOv8）+numpy（運算）+pandas（數據整理）+matplotlib（繪圖）'},
+  {id:92,stars:2,cat:'演算法',q:'YOLO的「Anchor Box（錨框）」在偵測孔雀魚時有沒有特別的設定？',hint:'YOLOv8用Anchor-free，不需手動設定；舊版YOLO需KMeans找孔雀魚主要寬高比'},
+  {id:93,stars:3,cat:'演算法',q:'訓練YOLO需要Google Colab T4，實際部署養殖場需要什麼硬體？',hint:'推論只需CPU筆電或Jetson Nano（約台幣5000-8000元）；訓練和推論硬體需求差很多'},
+  {id:94,stars:3,cat:'演算法',q:'你說為什麼要設計「砲筒（遮光管）」？',hint:'①遮擋外部反光→統一光線；②固定13cm距離→視錐體一致；③降低魚的閃避反應'},
+  {id:95,stars:2,cat:'演算法',q:'如果有一條魚突然死亡在缸底，YOLO會把它計進去嗎？',hint:'MOG2長期靜止→吸收進背景；YOLO依外觀仍可能計入→是潛在誤差來源'},
+  {id:96,stars:3,cat:'演算法',q:'你說「信心分數閾值設為0.25而非0.5」，這樣會不會產生太多誤報？',hint:'精確率vs召回率取捨；0.25讓母魚被偵測到（降低FN）；180秒最大值策略平滑偶發FP'},
+  {id:97,stars:2,cat:'演算法',q:'你的研究有做交叉驗證（Cross-validation）嗎？',hint:'採Roboflow的訓練/驗證/測試集分割；正式k-fold因資料量不足未完整實施'},
+  {id:98,stars:3,cat:'演算法',q:'你說有效容積標準曲線R²=0.994，這個實驗有沒有控制所有可能的誤差來源？',hint:'主要控制：固定缸+固定攝影機+固定照度+三次測量取平均；未控：水面折射+鏡頭畸變'},
+  {id:99,stars:3,cat:'演算法',q:'你的研究有沒有計算「False Negative（漏偵率）」和「False Positive（誤報率）」？',hint:'以覆蓋率整合FN和FP淨效果；覆蓋率<100%代表FN>FP；>100%代表FP>FN'},
+  {id:100,stars:4,cat:'演算法',q:'你說「三代演算法的演進」，能用一句話總結每代的核心限制嗎？',hint:'ImageJ：靜態不懂3D；OpenCV：不知道是不是魚；YOLO：知道是魚但高密度少算'},
+  {id:101,stars:5,cat:'空間幾何',q:'視錐體幾何模型（Frustum Model）的數學基礎是什麼？',hint:'W=2d×tan(θ/2)；V_view≈W×H×d；K=V_total/V_view；在封閉水缸中特別穩定'},
+  {id:102,stars:5,cat:'空間幾何',q:'為什麼攝影距離13cm被選為最佳距離？這個甜蜜點是怎麼確定的？',hint:'系統實驗1-29cm每2cm一組×5次重複；13cm覆蓋率96%最高+σ最小（最穩定）'},
+  {id:103,stars:5,cat:'空間幾何',q:'你說空間校正係數K=1.55，這個數字代表什麼？怎麼計算的？',hint:'K=1.55代表攝影機只看到65%體積；K=V_total(57000cm³)/V_view(36837cm³)≈1.55'},
+  {id:104,stars:4,cat:'空間幾何',q:'實驗三-2的標準曲線方程式y=1800x+15015（R²=0.994），y和x分別代表什麼？',hint:'x=攝影距離（cm）；y=有效觀測容積（cm³）；每增加1cm容積增加1800cm³'},
+  {id:105,stars:5,cat:'空間幾何',q:'三個取樣點是怎麼決定的？如果魚缸長度不同，取樣點數要怎麼調整？',hint:'最佳取樣點數=魚缸長度÷有效含蓋寬度；100cm÷42.8cm≈3個點'},
+  {id:106,stars:5,cat:'空間幾何',q:'在AI辨識捉放法中，「公魚比例27%」這個甜蜜點是怎麼找到的？',hint:'梯度實驗13.3%-60%共5組；26.7%時98.5%最高；低估/高估的平衡點'},
+  {id:107,stars:5,cat:'空間幾何',q:'AI辨識捉放法的完整計算公式是什麼？',hint:'YOLO計數Y×K空間校正（1.55）→再代入迴歸公式X=2.10Y−5.69→最終估計數'},
+  {id:108,stars:3,cat:'空間幾何',q:'你說「砲筒長度與水箱寬度比例達1:3時最佳」，這個比例的物理意義是什麼？',hint:'13cm距離含蓋寬度42.8cm≈1/3水缸長度；三個視錐體剛好覆蓋整個缸不嚴重重疊'},
+  {id:109,stars:3,cat:'空間幾何',q:'空間校正係數K=1.55，如果魚群不是隨機分布而是集中在底部，這個校正還有效嗎？',hint:'K假設均勻分布；非均勻需引入「空間分層加權」；K是成本效益解決方案'},
+  {id:110,stars:3,cat:'空間幾何',q:'你的研究設計了哪些「對照組」和「實驗組」？',hint:'對照組：直接計數法（Ground Truth）；實驗組：7種估算方法；相同操作變因比較'},
+  {id:111,stars:4,cat:'空間幾何',q:'實驗三-3中，為什麼1個取樣點的覆蓋率（106.8%）比2個點（82.7%）高？',hint:'2個點間距50cm<含蓋寬42.8cm→視錐體重疊→重複計數→但K未考慮重疊→低估'},
+  {id:112,stars:3,cat:'空間幾何',q:'你的研究中「有效容積」和「魚缸總體積」的差值代表什麼？',hint:'差值=視野死角體積（20163cm³）；K的校正假設死角密度和可見區相同'},
+  {id:113,stars:5,cat:'空間幾何',q:'實驗三-4（AI辨識捉放法）如何把傳統捉放法公式N=M×n÷R轉換成AI版本？',hint:'YOLO連續偵測公魚=R；全部魚=n；人工設定公魚數量=M；自動計算N；不需撈魚'},
+  {id:114,stars:4,cat:'空間幾何',q:'如果公魚和母魚在魚缸中不是均勻混合，AI辨識捉放法的覆蓋率會怎麼變化？',hint:'公魚集中死角→R偏低→N高估；集中在視野→R偏高→N低估；180秒游散緩解'},
+  {id:115,stars:3,cat:'空間幾何',q:'你的完整AI族群估算系統涉及哪些硬體和軟體元件？',hint:'硬體：C920+電腦+砲筒+支架+檯燈；軟體：Python+OpenCV+YOLOv8+迴歸公式'},
+  {id:116,stars:2,cat:'空間幾何',q:'你的研究中提到「空間幾何校正」，為什麼視錐體是錐台（Frustum）而不是完整的錐形？',hint:'從玻璃面到水缸對面才是有水體積；近底面=玻璃面；遠底面=水缸另一側'},
+  {id:117,stars:4,cat:'空間幾何',q:'「殘影效應」和「遮蔽效應」分別在哪些情況下更嚴重？',hint:'殘影=距離太近+魚游快；遮蔽=距離太遠+密度高；13cm是兩者平衡點'},
+  {id:118,stars:4,cat:'空間幾何',q:'你說「估計真實族群數=AI辨識數×K_space×迴歸校正係數」，三個元素各自補償什麼？',hint:'YOLO補信心偵測；K補視野死角；迴歸公式補YOLO系統性低估；三層校正'},
+  {id:119,stars:3,cat:'空間幾何',q:'如果有一天AI辨識精度提升到100%，你的系統還需要空間校正係數K嗎？',hint:'仍需要！K補的是空間死角（物理限制），不是演算法問題；除非多角度攝影機'},
+  {id:120,stars:3,cat:'空間幾何',q:'實驗三-4中公魚比例60%時覆蓋率（122.4%）比53.3%（158.7%）低，為什麼？',hint:'公魚過多→互相競爭/追逐→游動路徑不規律+重疊→NMS反而刪了一些公魚框'},
+  {id:121,stars:3,cat:'空間幾何',q:'前置實驗中「有效觀測容積」和「攝影覆蓋寬度」是怎麼測量的？',hint:'缸內壁貼防水方格紙；C920畫面中數格數換算含蓋寬度；三次測量取平均'},
+  {id:122,stars:4,cat:'空間幾何',q:'為什麼取樣點從3個增加到4個，覆蓋率反而從98.3%跌到76.3%？',hint:'4點間距25cm<含蓋寬42.8cm→嚴重重疊→K校正不考慮重疊→系統性低估'},
+  {id:123,stars:3,cat:'空間幾何',q:'前置實驗中測量的「照度3.2lux」和「38,150lux」相差約12,000倍，這有什麼意義？',hint:'找到「失效下限」和「理想工作條件」兩個極端→建立雙標準（只要開燈就達標）'},
+  {id:124,stars:2,cat:'空間幾何',q:'如果在養殖場24小時監測，晚上沒有自然光，系統要怎麼運作？',hint:'需加裝人工照明（LED）；或定時監測；考慮紅外線照明（不影響魚日夜週期）'},
+  {id:125,stars:4,cat:'空間幾何',q:'你使用了「線性迴歸（Linear Regression）」，請解釋這個統計方法的原理。',hint:'最小二乘法找最佳擬合直線；5個密度組均值做迴歸；斜率2.10截距-5.69；R²=0.926'},
+  {id:126,stars:5,cat:'挑戰',q:'你的研究有沒有「選擇性偏差（Selection Bias）」？白色背板是否讓魚的行為和真實環境不同？',hint:'有！白背板最佳條件；真實環境更複雜；本研究是Proof of Concept+建立基準值'},
+  {id:127,stars:4,cat:'挑戰',q:'你的研究有沒有做「盲測（Blind Experiment）」？',hint:'AI計數客觀；但OpenCV調參時研究者知道目標魚數，存在觀察者偏差（未設計盲測）'},
+  {id:128,stars:3,cat:'挑戰',q:'你的「樣本數（n=5到25隻）」夠大嗎？這個範圍夠代表真實養殖情境嗎？',hint:'統計上足夠（每組180個樣本）；應用上代表性有限（真實養殖可能數千條）'},
+  {id:129,stars:4,cat:'挑戰',q:'你說「K=1.55」，但這個K值是針對特定水缸大小算的。如果水缸尺寸改變，K怎麼辦？',hint:'通用公式：K=V_total/V_view；查標準曲線得V_view→計算K；每種缸型標定一次即可'},
+  {id:130,stars:3,cat:'挑戰',q:'你的研究有沒有統計顯著性檢定（如t-test）？覆蓋率的差異有沒有達到統計顯著？',hint:'只有描述性統計；未做推論性統計（t-test/ANOVA）；是本研究可補強的統計方法學部分'},
+  {id:131,stars:3,cat:'挑戰',q:'你的研究對「魚群的社會行為（如群游、領域性）」有沒有考量？',hint:'考量到群聚（沉餌法）+閃避（捉放法）+求偶活躍（AI捉放法重複計數）；行為影響K假設'},
+  {id:132,stars:3,cat:'挑戰',q:'如果有一天有200條魚，你的系統能處理嗎？需要做哪些調整？',hint:'需補充高密度訓練資料+重建迴歸公式+增加取樣點+考慮升級模型YOLOv8m'},
+  {id:133,stars:3,cat:'挑戰',q:'你假設「孔雀魚在水缸中隨機分布」，有沒有辦法驗證這個假設？',hint:'計算各區計數的變異數vs平均數；若相近則Poisson分布（隨機）；否則聚集'},
+  {id:134,stars:5,cat:'挑戰',q:'你說覆蓋率98.5%優於傳統捉放法，但傳統捉放法可以達到107%，有時候比98.5%更接近100%，你怎麼解釋？',hint:'107%是單次高估+不穩定+需撈魚；98.5%穩定+零接觸+自動重複→綜合評估AI方法更好'},
+  {id:135,stars:4,cat:'挑戰',q:'你的研究中，「樣本數（n=5到25隻）」考量了過擬合問題嗎？',hint:'42張訓練資料存在過擬合風險；已在結論補充：需擴充多樣性資料提升泛化能力'},
+  {id:136,stars:3,cat:'挑戰',q:'你的研究對「外部效度（External Validity）」有沒有考量？研究結果能推廣到多大範圍？',hint:'有限：只針對孔雀魚+封閉缸+特定照度；方法論框架（K+迴歸）可推廣其他情境'},
+  {id:137,stars:4,cat:'挑戰',q:'你說「迴歸公式X=2.10Y−5.69」，但只用5個密度組均值推導，這樣的迴歸可靠嗎？',hint:'5個點R²=0.926有根據；但自由度df=3，置信區間寬；外推超出5-25隻範圍不可靠'},
+  {id:138,stars:2,cat:'挑戰',q:'有沒有可能用更便宜的設備（如手機相機）取代Logitech C920？',hint:'理論上可以；手機需固定焦距+鎖定曝光；解析度更高但API串接複雜；需重新標定K'},
+  {id:139,stars:2,cat:'挑戰',q:'養殖池的水質不能用牛奶模擬混濁度，有沒有更符合真實的替代物？',hint:'Formazin標準濁度液（NTU正式標準）；矽藻土（模擬底砂）；轉換成NTU提升可比性'},
+  {id:140,stars:2,cat:'挑戰',q:'你的研究從開始到完成，大約花了多少時間？',hint:'說明研究階段：前期準備→OpenCV迭代→YOLO標注訓練→整合實驗→撰寫說明書'},
+  {id:141,stars:4,cat:'展望',q:'你的「AI辨識捉放法」如果要商業化，需要解決哪些問題？',hint:'公母雙類別重標注+室外驗證+硬體套件化+友善介面+定期更新模型機制'},
+  {id:142,stars:3,cat:'展望',q:'這個研究和「精準農業（Precision Agriculture）」有什麼連結？',hint:'數據驅動精準管理：知道族群數量→精準投餌+分缸+出售時機→降低損耗'},
+  {id:143,stars:3,cat:'展望',q:'你的技術能否應用在野生魚類的族群調查？有什麼挑戰？',hint:'水體混濁+光線不穩+背景複雜+魚種多樣+攝影機固定困難；適合半人工環境'},
+  {id:144,stars:3,cat:'展望',q:'除了孔雀魚，你的方法論框架適合應用在哪些水產養殖魚種？',hint:'鬥魚（公母差異大）+燈魚（螢光帶）+錦鯉（獨特體色）+有性別外觀差的魚種'},
+  {id:145,stars:2,cat:'展望',q:'你的研究提到「加入聲納技術」作為未來展望，請解釋聲納如何幫助族群估計。',hint:'聲納不受混濁度影響+覆蓋大範圍+穿透底部；缺點：設備昂貴+無法辨識性別'},
+  {id:146,stars:4,cat:'展望',q:'如果你的研究繼續，最想要的下一個突破是什麼？',hint:'DeepSORT目標追蹤→每條魚有唯一ID→消除重複計數+實現個體行為分析'},
+  {id:147,stars:2,cat:'展望',q:'這個研究能不能幫助解決「過度捕撈（Overfishing）」問題？',hint:'間接：AI精準數量估計→科學配額設定→更接近MSY（最大可持續產量）'},
+  {id:148,stars:5,cat:'展望',q:'你的研究架構圖顯示了從捉放法到AI辨識捉放法的演進，請用三句話總結這個研究的邏輯脈絡。',hint:'①生態學出發發現接觸限制；②三代演算法迭代突破技術瓶頸；③整合設計出零接觸全自動AI辨識捉放法'},
+  {id:149,stars:4,cat:'展望',q:'如果評審說「你的覆蓋率98.5%是在控制環境下測的，不能代表真實情況」，你怎麼回應？',hint:'正確！這是Proof of Concept；建立了基準值+環境控制框架；推廣需要室外驗證'},
+  {id:150,stars:4,cat:'展望',q:'你的研究說明書提到「N=M×n÷R」，這個公式有沒有數學上的嚴格推導？',hint:'有！超幾何分布（Hypergeometric Distribution）的最大似然估計量；大樣本下是N的不偏估計量'},
+  {id:151,stars:5,cat:'倫理',q:'你的研究有沒有遵守實驗動物倫理規範？（3R原則）',hint:'3R：Replace（AI取代撈魚）+Reduce（最少操作次數）+Refine（AI辨識捉放法最終零接觸）'},
+  {id:152,stars:3,cat:'倫理',q:'你的研究數據如果要發表在學術期刊，還缺少哪些元素？',hint:'統計顯著性檢定+置信區間+更大樣本+獨立測試集+文獻系統性回顧+倫理聲明'},
+  {id:153,stars:3,cat:'倫理',q:'你的研究有沒有可重複性（Reproducibility）？別人能不能複製你的實驗？',hint:'有！提供所有關鍵參數（照度/混濁度/距離/取樣點/公魚比例/程式參數）；需公開best.pt'},
+  {id:154,stars:3,cat:'倫理',q:'你的研究對「外部效度（External Validity）」有沒有考量？',hint:'說明書的「應用限制」段落已討論：魚種/環境/規模的推廣限制'},
+  {id:155,stars:2,cat:'倫理',q:'研究說明書中的參考文獻品質如何？有沒有引用不適當的來源？',hint:'部分引用個人部落格/Medium文章（灰色文獻）；應補充正式期刊論文（如YOLO原始論文）'},
+  {id:156,stars:4,cat:'倫理',q:'你在研究中發現了哪些「意外的」結果？這些意外給了你什麼啟示？',hint:'①沉餌法越少區越準；②3點比6點更準；③YOLO公魚幾乎失明→科學研究常違反直覺'},
+  {id:157,stars:3,cat:'倫理',q:'你的研究題目中有「AI」兩個字，但也用了很多非AI的方法，這樣的題目命名有沒有誤導？',hint:'沒有！非AI方法是對照組+演進階段；最終成果確實聚焦在AI；如藥物研究需安慰劑對照'},
+  {id:158,stars:3,cat:'倫理',q:'你怎麼確保每次實驗的「操作一致性」？',hint:'同一人操作+相同工具+尺規固定13cm+LUX App確認照度+程式參數固定+記錄日期時間'},
+  {id:159,stars:3,cat:'倫理',q:'你說「孔雀魚捕撈操作影響存活」，這個數字是基於多少次觀察？',hint:'改為引用文獻；不主動提實測死亡率數據（胡老師：可能影響參賽資格）'},
+  {id:160,stars:3,cat:'倫理',q:'如果你的研究要再做一遍，你最想改變哪一點？',hint:'從一開始就建立Male/Female雙類別混合訓練集→公魚辨識從-98%改善到±10%'},
+  {id:161,stars:4,cat:'綜合',q:'如果你是評審，你會給這份研究幾分（滿分10分）？哪個部分最強？哪個最弱？',hint:'最強：跨學科整合+三代演算法脈絡+前置實驗嚴謹；最弱：訓練集42張+公魚辨識失效'},
+  {id:162,stars:3,cat:'綜合',q:'這個研究屬於哪些學科的交叉？',hint:'生態學+電腦科學/AI+統計學+幾何學+工程學+農業科學→STEM跨領域整合示範'},
+  {id:163,stars:4,cat:'綜合',q:'你的研究「混水眸魚」這個主題，對台灣的中小學生有沒有什麼教育意義？',hint:'跨科整合示範+失敗的價值+AI不神秘+產業連結→STEM教育最佳體現'},
+  {id:164,stars:2,cat:'綜合',q:'你有沒有考慮過把你的程式碼公開（Open Source）？',hint:'計畫GitHub公開程式碼；best.pt需確認照片版權；公開後可讓更多人使用改進'},
+  {id:165,stars:3,cat:'綜合',q:'你的研究有沒有參考類似的已發表論文？你的研究在這個領域的定位是什麼？',hint:'填補生態學捉放法×AI視覺辨識的空缺；孔雀魚YOLO辨識+AI辨識捉放法設計相對少見'},
+  {id:166,stars:3,cat:'綜合',q:'你的說明書使用了「族群覆蓋率」而不用「準確率」，這個術語選擇有什麼特別意義？',hint:'覆蓋率是生態學標準術語；可反映高估/低估方向和幅度；比準確率（離散）更精確'},
+  {id:167,stars:5,cat:'綜合',q:'如果評審問你「這個研究的最大創新點是什麼？」你的回答是什麼？',hint:'AI辨識捉放法：公魚天然標記×YOLOv8自動辨識×捉放法公式；零接觸全自動98.5%'},
+  {id:168,stars:4,cat:'綜合',q:'你的說明書有30頁，對評審來說最重要的3頁是什麼？',hint:'①AI辨識捉放法結果（核心成果）；②三代演算法比較折線圖；③各方法最佳覆蓋率比較表'},
+  {id:169,stars:5,cat:'綜合',q:'如果只有30秒讓你說明這個研究，你怎麼說？',hint:'不撈魚！AI看公魚花紋當標記→自動計算捉放法公式→98.5%覆蓋率→全自動養殖監測'},
+  {id:170,stars:4,cat:'綜合',q:'最後，如果評審說「你這個研究我找不到任何缺點」，你怎麼回應？',hint:'承認公魚辨識-97.9%+統計方法不完整+控制環境限制；科學不在完美而在誠實推進'},
+  {id:171,stars:3,cat:'數字',q:'標準測試微型缸（15×15×20cm）和模擬養殖觀測缸（100×30×20cm）各自的總體積是多少？',hint:'微型缸：15×15×15=3375cm³（水位15cm）；觀測缸：100×30×20=60000cm³'},
+  {id:172,stars:3,cat:'數字',q:'說明書中提到水量「固定3375mL」，請問這是怎麼算出來的？',hint:'微型缸15×15×15（水位非缸高）=3375cm³；留5cm防止魚跳出'},
+  {id:173,stars:4,cat:'數字',q:'說明書說「等效混濁比=牛奶量÷水量（2,700mL）」，但水量固定是3375mL，為什麼不一致？',hint:'前置實驗不同階段用了不同水位；需在說明書中統一或加以說明'},
+  {id:174,stars:2,cat:'數字',q:'你把五種公母比例（10/90到50/50）換算成100隻族群，公魚各有幾隻？',hint:'10%=10隻；20%=20隻；30%=30隻；40%=40隻；50%=50隻（等差梯度）'},
+  {id:175,stars:3,cat:'數字',q:'說明書說「每次注入5mL牛奶，靜置30秒」，為什麼是5mL而不是1mL或10mL？',hint:'平衡解析度（5mL≈0.185%等效混濁比）和操作效率（10-15次找到臨界值）'},
+  {id:176,stars:5,cat:'數字',q:'YOLOv8的迴歸校正公式「X=2.10Y−5.69」，如果YOLO在n=25時偵測到13.25隻，代入後得到多少？誤差是多少？',hint:'X=2.10×13.25−5.69=22.1隻；誤差=(22.1-25)/25×100%=-11.4%；覆蓋率≈88.6%'},
+  {id:177,stars:5,cat:'數字',q:'實驗三-2的空間校正係數K=1.55是怎麼精確算出來的？',hint:'K=V_total/V_view=57000/36837≈1.548≈1.55；V_total=30×19×20（水位不同）'},
+  {id:178,stars:3,cat:'數字',q:'說明書中「攝影覆蓋寬度42.8cm」是怎麼測量的？為什麼要測量三次取平均？',hint:'防水方格紙貼後壁→C920畫面數格數；三次減少手動判讀誤差；σ≈2cm'},
+  {id:179,stars:3,cat:'數字',q:'說明書說「1FPS頻率取樣180秒」，這樣共有幾張影格？每張影格之間間隔多久？',hint:'180秒×1幀/秒=180張；每張間隔1秒；1秒足夠孔雀魚游動改變位置'},
+  {id:180,stars:4,cat:'數字',q:'說明書中，「最終估計族群數=AI辨識數×K_space×迴歸校正係數」，如果三個取樣點的AI辨識數分別是8、7、9隻，最終估計數是多少？',hint:'平均8隻×K1.55=12.4；代入X=2.10×12.4−5.69≈20隻'},
+  {id:181,stars:4,cat:'數字',q:'你說「最佳公魚比例27%」，但實驗只測了13.3%、26.7%、40%三個接近的數據點。最佳點真的是27%嗎？',hint:'26.7%是最高測試點；無更細梯度；保守說法應是「約25-30%」而非精確27%'},
+  {id:182,stars:3,cat:'數字',q:'說明書提到「YOLOv8n模型架構」，「n」代表什麼？這個選擇有什麼理由？',hint:'nano版最輕量；適合i5筆電1FPS即時推論；可移植Jetson Nano邊緣設備'},
+  {id:183,stars:3,cat:'數字',q:'說明書第4頁的研究架構圖（圖1-3）顯示了哪些研究路線？請你口頭描述這張圖的核心邏輯。',hint:'左側：技術迭代（ImageJ→OpenCV→YOLO）；右側：AI系統建構；匯合在AI辨識捉放法'},
+  {id:184,stars:4,cat:'數字',q:'說明書列出的研究問題有三個，最終各自有沒有得到解答？',hint:'問題一（捉放法）：完整；問題二（攝影法）：完整；問題三（AI捉放法）：已設計驗證但公魚辨識待改善'},
+  {id:185,stars:4,cat:'數字',q:'說明書的摘要提到「覆蓋率超過95%」，但你的YOLO在n=10時只有76%，這樣的摘要說法有問題嗎？',hint:'摘要指最終完整系統（AI辨識捉放法）；非YOLO單獨在n=10的原始偵測值；需在摘要中說明清楚'},
+  {id:186,stars:5,cat:'答辯',q:'如果評審問了一個你完全不懂的問題，你怎麼處理？',hint:'誠實說明知識邊界+說出相關部分+記下來說這是未來深入方向；比硬扯更獲尊重'},
+  {id:187,stars:5,cat:'答辯',q:'如果評審說「你的研究就是把別人的YOLO拿來用而已，沒什麼原創性」，你怎麼回應？',hint:'原創性在方法設計：天然標記概念+K=1.55幾何校正+迴歸補償+AI辨識捉放法整合'},
+  {id:188,stars:5,cat:'答辯',q:'如果評審要求你「現場用30秒說明這個研究對社會有什麼貢獻」，你怎麼說？',hint:'不撈魚→AI看公魚→自動捉放法公式→98.5%→全自動養殖監測→台灣水產智慧升級'},
+  {id:189,stars:5,cat:'答辯',q:'如果兩位評審對你的結論意見不同，你怎麼應對？',hint:'兩位都對！承認兩個面向；說明改進路徑；展現科學思維：有亮點也有明確改進方向'},
+  {id:190,stars:5,cat:'答辯',q:'如果評審說「你說覆蓋率98.5%，但你只做了一個特定條件的實驗，這樣怎麼能推廣？」，你怎麼回應？',hint:'Proof of Concept階段；建立了基準值+環境控制框架；推廣到真實環境需下一步驗證'},
+  {id:191,stars:3,cat:'答辯',q:'評審問你「你有沒有閱讀過正式的學術期刊論文？」，你怎麼回答？',hint:'誠實說明：有查找YOLO原始論文+Lincoln-Petersen生態文獻；英文閱讀限制；未來補強'},
+  {id:192,stars:2,cat:'答辯',q:'如果評審問「你有沒有可能用更少的設備達到同樣的效果？」，你怎麼回答？',hint:'手機（零成本）可替代C920；需解決自動對焦+鎖定曝光；成本可壓到3000-5000元'},
+  {id:193,stars:2,cat:'答辯',q:'評審詢問「你的研究有沒有申請參加其他科展或競賽？」，你怎麼回答？',hint:'依實際情況回答；強調選擇臺中市科展是因在地農業情境+希望本地專家評審建議'},
+  {id:194,stars:4,cat:'答辯',q:'如果評審問「你有沒有跟大學教授或業界人士請教過？」，你怎麼回答？',hint:'說明興大教授訪談（2次）+胡老師指導+各教授的具體建議如何影響研究設計'},
+  {id:195,stars:3,cat:'答辯',q:'如果評審問「這個研究花了多少錢？」，你能說明主要費用嗎？',hint:'C920約2000元+魚缸約1500元+其他500元=約4000元；軟體全部免費'},
+  {id:196,stars:5,cat:'答辯',q:'評審詢問「你的說明書有30頁，哪3頁最值得評審仔細看？為什麼？」',hint:'①AI辨識捉放法結果（最終成果）；②三代演算法折線圖（進化脈絡）；③方法比較總表（全貌）'},
+  {id:197,stars:3,cat:'答辯',q:'評審問「如果讓你重新設計這個研究，你會從哪裡開始？」',hint:'從YOLO訓練資料設計開始：Male/Female雙類別混合場景→公魚辨識問題從根本解決'},
+  {id:198,stars:4,cat:'答辯',q:'評審問「你在整個研究過程中，最有成就感的一刻是什麼？」',hint:'第一次看到AI辨識捉放法98.5%出來的那一刻：兩個完全不同學科在一個數字上交匯了'},
+  {id:199,stars:5,cat:'答辯',q:'如果評審說「你只是一個國中生，這個研究真的是你自己做的嗎？」，你怎麼回應？',hint:'說明自己做了什麼（程式/標注/數據）+老師只給方向性建議+提供深入技術問答機會'},
+  {id:200,stars:5,cat:'答辯',q:'評審結束時問「你有什麼想問評審的問題嗎？」，你怎麼把握這個機會？',hint:'請教評審：本研究方法論上最需要補強的環節是什麼？展現學習態度+科學謙遜'},
+];
+
+const STUDENTS=[
+  {key:"yi",name:"奕淨",tc:"yi-t",ba:"yia",pba:"yia",color:"#9d174d",bg:"#fce7f3",bar:"#f472b6"},
+  {key:"xi",name:"星妍",tc:"xi-t",ba:"xia",pba:"xia",color:"#3730a3",bg:"#e0e7ff",bar:"#818cf8"},
+];
+
+const CATS=["全部",...[...new Set(QUESTIONS.map(q=>q.cat))]];
+const SBG={5:"#fef3c7",4:"#dcfce7",3:"#dbeafe",2:"#f3f4f6",1:"#f9fafb"};
+const STC={5:"#b45309",4:"#166534",3:"#1e40af",2:"#6b7280",1:"#9ca3af"};
+const SLB={5:"⭐ 必考",4:"★★★★",3:"★★★",2:"★★",1:"★"};
+
+function ls(k,d){try{return JSON.parse(localStorage.getItem(k)||"null")??d;}catch{return d;}}
+function lss(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+
+let state={
+  passed:ls("qbp3",{}),
+  mode:"student",curStu:"yi",
+  filter:"全部",sf:0,
+  view:"list",cur:null,showHint:false,ans:"",checking:false,fb:null,
+  listening:false
+};
+
+// 語音辨識
+let recog=null;
+const hasSpeech=('webkitSpeechRecognition' in window)||('SpeechRecognition' in window);
+if(hasSpeech){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recog=new SR();
+  recog.lang='zh-TW';
+  recog.continuous=false;
+  recog.interimResults=false;
+  recog.onresult=e=>{
+    const t=e.results[0][0].transcript;
+    state.ans=(state.ans?state.ans+' ':'')+t;
+    setState({listening:false,ans:state.ans});
+    const el=document.getElementById('ansInput');
+    if(el)el.value=state.ans;
+  };
+  recog.onerror=()=>setState({listening:false});
+  recog.onend=()=>setState({listening:false});
+}
+
+function toggleMic(){
+  if(!recog)return;
+  if(state.listening){recog.stop();setState({listening:false});}
+  else{try{recog.start();setState({listening:true});}catch{}}
+}
+
+function savePassed(p){state.passed=p;lss("qbp3",p);render();}
+function setState(u){Object.assign(state,u);render();}
+function who(id){return state.passed[id]||[];}
+function scnt(key){return QUESTIONS.filter(q=>(state.passed[q.id]||[]).includes(key)).length;}
+function toggleSP(id,key){
+  const cur=[...(state.passed[id]||[])];
+  const i=cur.indexOf(key);
+  if(i>=0)cur.splice(i,1);else cur.push(key);
+  savePassed({...state.passed,[id]:cur});
+}
+function resetAll(){if(confirm('確定清除所有進度？'))savePassed({});}
+function filtered(){return QUESTIONS.filter(q=>(state.filter==='全部'||q.cat===state.filter)&&(state.sf===0||q.stars===state.sf));}
+const TOT=QUESTIONS.length;
+
+async function submit(){
+  const el=document.getElementById('ansInput');
+  const ans=el?el.value:state.ans;
+  if(!ans.trim()||!state.cur||state.checking)return;
+  state.ans=ans;
+  setState({checking:true,fb:null});
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',max_tokens:150,
+        system:'你是科展評審。判斷學生是否掌握核心概念（不需完全一樣）。只回覆JSON：{"pass":true/false,"feedback":"一句話"}',
+        messages:[{role:'user',content:'題目：'+state.cur.q+'\n參考重點：'+state.cur.hint+'\n學生回答：'+ans}]
+      })
+    });
+    const d=await r.json();
+    const t=d.content?.[0]?.text||'{}';
+    const fb=JSON.parse(t.match(/\{[\s\S]*?\}/)?.[0]||'{}');
+    if(fb.pass)toggleSP(state.cur.id,state.curStu);
+    setState({checking:false,fb,ans});
+  }catch{
+    setState({checking:false,fb:{pass:false,feedback:'網路連線錯誤，請使用手動通過功能'},ans});
+  }
+}
+
+function openQ(id){const q=QUESTIONS.find(x=>x.id===id);setState({view:'detail',cur:q,showHint:false,ans:'',fb:null,checking:false,listening:false});}
+function goNext(){const f=filtered();const i=f.findIndex(x=>x.id===state.cur?.id);if(i<f.length-1)openQ(f[i+1].id);}
+function goPrev(){const f=filtered();const i=f.findIndex(x=>x.id===state.cur?.id);if(i>0)openQ(f[i-1].id);}
+
+function render(){document.getElementById('app').innerHTML=state.view==='list'?renderList():renderDetail();}
+
+function nTags(ids){
+  if(!ids||!ids.length)return'';
+  return ids.map(k=>{const s=STUDENTS.find(x=>x.key===k);return s?'<span class="ntag '+s.tc+'">'+s.name+'</span>':''}).join('');
+}
+
+function renderList(){
+  const f=filtered();
+  const lbR=STUDENTS.map(s=>{
+    const c=scnt(s.key);const p=Math.round(c/TOT*100);
+    return '<div class="lbr"><span class="lbn" style="color:'+s.color+'">'+s.name+'</span><div class="lbb"><div class="lbbf" style="width:'+p+'%;background:'+s.bar+'"></div></div><span class="lbnum">'+c+'/'+TOT+'</span></div>';
+  }).join('');
+
+  const cats=CATS.map(c=>'<button onclick="setState({filter:\''+c+'\'})" class="fbtn '+(state.filter===c?'active':'')+'">'+c+'</button>').join('');
+  const stars=[0,5,4,3,2].map(s=>'<button onclick="setState({sf:'+(state.sf===s?0:s)+'})" class="fbtn '+(state.sf===s?'active':'')+'" style="'+(state.sf===s&&s>0?'background:'+SBG[s]+';color:'+STC[s]+';border-color:#93c5fd':'')+'">'+(s===0?'全部':SLB[s])+'</button>').join('');
+
+  const qrows=f.map(q=>{
+    const w=who(q.id);const pa=w.length===STUDENTS.length;const ps=w.length>0&&!pa;
+    const tags=w.map(k=>{const s=STUDENTS.find(x=>x.key===k);return s?'<span class="ntag '+s.tc+'">'+s.name+'</span>':''}).join('');
+    return '<button onclick="openQ('+q.id+')" class="q-item '+(pa?'pall':ps?'psome':'')+'">'
+      +'<div class="qnum" style="background:'+(pa?'#dcfce7':ps?'#d1fae5':SBG[q.stars]||'#f3f4f6')+';color:'+(pa?'#166534':ps?'#059669':STC[q.stars]||'#374151')+'">'+(pa?'✓':q.id)+'</div>'
+      +'<div class="qtxt"><div class="qq">'+q.q+'</div><div class="qcat">'+q.cat+'</div></div>'
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">'
+      +'<span class="sbadge" style="background:'+SBG[q.stars]+';color:'+STC[q.stars]+'">'+(SLB[q.stars]||'★')+'</span>'
+      +(tags?'<div style="display:flex;gap:2px;flex-wrap:wrap;justify-content:flex-end">'+tags+'</div>':'')
+      +'</div></button>';
+  }).join('');
+
+  return '<div class="header">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">'
+    +'<div><div class="title">混水「眸」魚 口試練習平台</div><div class="subtitle">全 '+TOT+' 題</div></div>'
+    +'<div class="mode-btns">'
+    +'<button onclick="setState({mode:\'student\'})" class="mode-btn '+(state.mode==='student'?'ms':'')+'">學生</button>'
+    +'<button onclick="setState({mode:\'teacher\'})" class="mode-btn '+(state.mode==='teacher'?'mt':'')+'">教師</button>'
+    +'<button onclick="resetAll()" class="mode-btn mr">重置</button>'
+    +'</div></div>'
+    +'<div class="lb"><div class="lbt">通過進度</div>'+lbR+'</div>'
+    +'</div>'
+    +(state.mode==='student'?'<div class="psel"><span class="pslbl">目前練習：</span>'+STUDENTS.map(s=>'<button onclick="setState({curStu:\''+s.key+'\'})" class="psb '+(state.curStu===s.key?s.pba:'')+'">'+s.name+'</button>').join('')+'</div>':'')
+    +'<div class="filter-row">'+cats+'</div>'
+    +'<div class="filter-row">'+stars+'</div>'
+    +'<div class="q-count">'+f.length+' 題 · 深綠=兩人都過 · 淺綠=一人通過</div>'
+    +'<div>'+qrows+'</div>';
+}
+
+function renderDetail(){
+  const q=state.cur;if(!q)return'';
+  const f=filtered();const idx=f.findIndex(x=>x.id===q.id);
+  const w=who(q.id);
+  const whoH=w.length?'<div class="wpassed"><span class="wlbl">已通過：</span>'+w.map(k=>{const s=STUDENTS.find(x=>x.key===k);return s?'<span class="wtag" style="background:'+s.bg+';color:'+s.color+'">'+s.name+'</span>':''}).join('')+'</div>':'';
+
+  const hintBox=state.showHint?'<div class="hint-box"><div class="ht">參考答案提示</div><p>'+q.hint+'</p></div>':'';
+  const fbBox=state.fb?'<div class="fb '+(state.fb.pass?'ok':'fail')+'"><div class="fbt">'+(state.fb.pass?'✓ 通過！':'✗ 再想想看')+'</div><p>'+(state.fb.feedback||'')+'</p></div>':'';
+
+  let interact='';
+  if(state.mode==='teacher'){
+    const btns=STUDENTS.map(s=>'<button onclick="toggleSP('+q.id+',\''+s.key+'\')" class="btp '+(w.includes(s.key)?s.ba?s.ba:'':'')+'">'+((w.includes(s.key)?'✓ ':'')+s.name+(w.includes(s.key)?' 已過':' 通過'))+'</button>').join('');
+    interact='<div class="tbox"><div class="ttl">教師參考答案</div><p>'+q.hint+'</p><div class="tpr">'+btns+'</div></div>';
+  }else{
+    const curS=STUDENTS.find(x=>x.key===state.curStu)||STUDENTS[0];
+    const alrPass=w.includes(state.curStu);
+    const micBtn=hasSpeech
+      ?'<div style="display:flex;flex-direction:column;align-items:center">'
+        +'<button onclick="toggleMic()" class="mic-btn '+(state.listening?'listening':'')+'" title="語音輸入">'+(state.listening?'⏹':'🎤')+'</button>'
+        +'<div class="mic-hint">'+(state.listening?'錄音中...':'點此說話')+'</div>'
+        +'</div>'
+      :'<div class="no-voice">瀏覽器不支援語音（請用 Chrome）</div>';
+
+    interact='<div style="margin-bottom:6px;font-size:13px;color:#6b7280">目前回答：<span style="font-weight:500;color:'+curS.color+'">'+curS.name+'</span>'+(alrPass?'<span style="margin-left:8px;font-size:12px;padding:2px 8px;border-radius:10px;background:'+curS.bg+';color:'+curS.color+'">✓ 已通過</span>':'')+'</div>'
+      +'<div class="voice-area">'
+      +'<div class="voice-row">'
+      +'<textarea id="ansInput" class="ans" placeholder="在這裡輸入回答，或點右邊麥克風用說的...">'+state.ans+'</textarea>'
+      +micBtn
+      +'</div>'
+      +'<div class="action-btns">'
+      +'<button onclick="submit()" class="bp" '+(state.checking?'disabled':'')+'>'+( state.checking?'AI 判斷中...':'送出回答')+'</button>'
+      +'<button onclick="setState({showHint:!state.showHint})" class="bs">'+(state.showHint?'隱藏提示':'顯示提示')+'</button>'
+      +'<button onclick="toggleSP('+q.id+',\''+state.curStu+'\')" class="bpass">'+(alrPass?'取消通過':'手動通過')+'</button>'
+      +'</div>'
+      +fbBox
+      +'</div>'
+      +hintBox;
+  }
+
+  return '<button onclick="setState({view:\'list\',cur:null,listening:false})" class="back-btn">← 返回</button>'
+    +'<div class="dhead">'
+    +'<span style="font-size:12px;color:#94a3b8">'+(idx+1)+' / '+f.length+'</span>'
+    +'<span class="badge" style="background:'+SBG[q.stars]+';color:'+STC[q.stars]+';font-weight:500">'+(SLB[q.stars]||'★')+'</span>'
+    +'<span class="badge" style="background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0">'+q.cat+'</span>'
+    +'</div>'
+    +'<div class="q-card"><div class="qno">題目 #'+q.id+'</div><div class="qfull">'+q.q+'</div>'+whoH+'</div>'
+    +interact
+    +'<div class="nav-btns">'
+    +'<button onclick="goPrev()" class="nbtn" '+(idx===0?'disabled:true':'')+'>← 上一題</button>'
+    +'<button onclick="goNext()" class="nbtn" '+(idx===f.length-1?'disabled:true':'')+'>下一題 →</button>'
+    +'</div>';
+}
+
+render();
+</script>
+</body>
+</html>
